@@ -50,6 +50,7 @@
       ansible.builtin.unarchive:
         src: "{{ tmp_dir }}/{{ ovf_zip }}"
         dest: "{{ ovf_dir }}/lib"
+        remote_src: true
     - name: "Link ovtool executable in {{ ovf_dir }}/bin"
       ansible.builtin.file:
         state: link
