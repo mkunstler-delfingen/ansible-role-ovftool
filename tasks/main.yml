@@ -37,6 +37,7 @@
       ansible.builtin.file:
         mode: 0755
         path: "{{ tmp_dir }}/{{ ovf_zip }}"
+      ignore_errors: "{{ ansible_check_mode }}"
 
     - name: Install OVFtool
       ansible.builtin.command: "{{ tmp_dir }}/{{ ovf_zip }} --eulas-agreed --required --console"
