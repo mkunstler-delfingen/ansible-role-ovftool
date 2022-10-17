@@ -7,7 +7,7 @@
     fail_msg: ovf_install must be either 'zip' or 'bundle'
 
 - name: Install prerequisites
-  ansible.builyin.package:
+  ansible.builtin.package:
     name: unzip
     state: present
   become: true
