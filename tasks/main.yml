@@ -1,42 +1,62 @@
 # Copyright 2015 VMware, Inc.  All rights reserved.
 # SPDX-License-Identifier: Apache-2.0 OR GPL-3.0-only
 ---
+- name: Ensure Install method specified is valid
+  ansible.builtin.assert:
+    that: ovf_install_from in ['zip', 'bundle']
+    fail_msg: ovf_install must be either 'zip' or 'bundle'
+
 - name: Install prerequisites
-  become: yes
-  package:
+  ansible.builyin.package:
     name: unzip
     state: present
+  become: true
 
 - name: Check zip file stats
-  stat:
+  ansible.builtin.stat:
     path: "{{ tmp_dir }}/{{ ovf_zip }}"
-    get_checksum: yes
+    get_checksum: true
     checksum_algorithm: md5
   register: ovfzip_stat
 
 - name: Download
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ ovf_zip_url }}"
     dest: "{{ tmp_dir }}"
-  when: (not ovfzip_stat.stat.exists or (ovfzip_stat.stat.checksum != "{{ ovf_zip_md5 }}"))
+    mode: '0644'
+  when: (not ovfzip_stat.stat.exists or (ovfzip_stat.stat.checksum != ovf_zip_md5))
   register: dload
 
 - name: Check binary stats
-  stat: path="{{ ovf_dir }}/ovftool/ovftool"
+  ansible.builtin.stat: path="{{ ovf_dir }}/ovftool/ovftool"
   register: ovf_stat
 
-- name: Make bundle executable
-  file:
-    mode: 0755
-    path: "{{ tmp_dir }}/{{ ovf_zip }}"
+- name: Install from bundle
+  block:
+    - name: Make bundle executable
+      ansible.builtin.file:
+        mode: 0755
+        path: "{{ tmp_dir }}/{{ ovf_zip }}"
 
-- name: Install OVFtool
-  become: yes
-  shell: "{{ tmp_dir }}/{{ ovf_zip }} --eulas-agreed --required --console"
-  when: dload.changed or (not ovf_stat.stat.exists)
-  tags:
-    - skip_ansible_lint
+    - name: Install OVFtool
+      ansible.builtin.command: "{{ tmp_dir }}/{{ ovf_zip }} --eulas-agreed --required --console"
+      become: true
+      when: (not ovf_stat.stat.exists) or dload.changed # noqa no-handler
+  when: ovf_install_from == "bundle"
+
+- name: Install from zip
+  block:
+    - name: Unzip OVFtool contents
+      ansible.builtin.unarchive:
+        file: "{{ tmp_dir }}/{{ ovf_zip }}"
+        dest: "{{ ovf_dir }}/lib"
+    - name: "Link ovtool executable in {{ ovf_dir }}/bin"
+      ansible.builtin.file:
+        state: link
+        src: "{{ ovf_dir }}/lib/{{ ovf_zip_extracted_folder }}/ovftool"
+        path: "{{ ovf_dir }}/bin/ovftool"
+  when: ovf_install_from == "zip"
 
 - name: Test that it operates
-  command: "ovftool --help"
-  changed_when: False
+  ansible.builtin.command: "ovftool --help"
+  changed_when: false
