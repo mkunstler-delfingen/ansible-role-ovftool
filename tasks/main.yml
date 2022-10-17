@@ -48,7 +48,7 @@
   block:
     - name: Unzip OVFtool contents
       ansible.builtin.unarchive:
-        file: "{{ tmp_dir }}/{{ ovf_zip }}"
+        src: "{{ tmp_dir }}/{{ ovf_zip }}"
         dest: "{{ ovf_dir }}/lib"
     - name: "Link ovtool executable in {{ ovf_dir }}/bin"
       ansible.builtin.file:
