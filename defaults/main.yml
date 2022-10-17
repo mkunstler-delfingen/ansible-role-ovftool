@@ -15,6 +15,11 @@ ovf_zip_md5: "63698e602af6e24640146a6592348c99"
 # Ansible "url" module will support.
 ovf_zip_url: "{{ download_site }}/{{ ovf_zip }}"
 
+# Installation base path for ovftools
+# OVFtool installer will create a folder under relative ./lib
+# and symlink running script in under relative ./bin
+ovf_dir: /usr
+
 # The directory into which to install the downloaded ovftool binaries.
 # The installation mode. Can be "zip" or "bundle" (default)
 ovf_install_from: "bundle"
