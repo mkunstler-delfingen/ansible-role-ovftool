@@ -11,25 +11,25 @@ This role currently supports only Debian/Ubuntu distros.
 
 ## Role Variables
 
-Note: A non-defaulted variable, download_site, must be set by a vars file
-or by other mechanism prior to calling this role. The download_site must
-provide a valid URL base (e.g., <http://mysite.com/downloads>)
-from which the download files (e.g., ISO files or similar) may be obtained.
-in particular, see the ovf_zip_url variable below.
+Variables are declared to download latest known ovftool ([4.6.2](https://developer.vmware.com/web/tool/4.6.2/ovf-tool) in october 2023).
 
 ```yaml
 # The temporary directory to use for storing downloaded and other temporary file.
 tmp_dir: "/tmp"
 
 # The ovftool binary to download.
-ovf_zip: "VMware-ovftool-4.1.0-2459827-lin.x86_64.zip"
+ovf_zip: "{{ ovf_zip_url | urlsplit('path') | basename }}"
 
 # The MD5 hash of the binary to download.
-ovf_zip_md5: "63698e602af6e24640146a6592348c99"
+# Could be find in download page
+ovf_zip_md5: 9fbd2d95828ef800ce8e3ac916e8ed3e
 
 # The url to use for downloading the binary.
 # Note: you must define the download_site in a vars file.
-ovf_zip_url: "{{ download_site }}/{{ ovf_zip }}"
+ovf_zip_url: https://vdc-download.vmware.com/vmwb-repository/dcr-public/8a93ce23-4f88-4ae8-b067-ae174291e98f/c609234d-59f2-4758-a113-0ec5bbe4b120/VMware-ovftool-4.6.2-22220919-lin.x86_64.zip
+
+# The installation mode. Can be "zip" or "bundle" (default)
+ovf_install_from: zip
 
 # The directory into which to install the downloaded ovftool binaries.
 ovf_dir: "/usr/local/bin"
